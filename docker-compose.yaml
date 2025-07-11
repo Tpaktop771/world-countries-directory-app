@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: countries-app
+    volumes:
+      - ./app:/var/www/app
+    working_dir: /var/www/app
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USERNAME=user
+      - DB_PASSWORD=password
+      - DB_NAME=world
+    ports:
+      - "9000:9000"
+
+  db:
+    container_name: countries-db
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=world
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+    volumes:
+      - ./mysql/init:/docker-entrypoint-initdb.d
+
+  nginx:
+    image: nginx:latest
+    container_name: countries-nginx
+    volumes:
+      - ./app:/var/www/app
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
